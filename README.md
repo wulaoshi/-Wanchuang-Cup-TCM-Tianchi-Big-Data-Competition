@@ -1,4 +1,4 @@
-# - “万创杯”中医文献问题生成，Rank2
+# [“万创杯”中医文献问题生成](https://tianchi.aliyun.com/competition/entrance/531826/rankingList)，Rank2
 **选手**：[李婵娟](https://moon290.github.io/)，[罗诚](https://github.com/wulaoshi)
 
 **实验室**：[四川大学，Dilab](https://github.com/dilab-scu)
