@@ -1,5 +1,4 @@
-# -
-“万创杯”中医文献问题生成，Rank2
+# - “万创杯”中医文献问题生成，Rank2
 **选手**：[李婵娟](https://moon290.github.io/)，[罗诚](https://github.com/wulaoshi)
 
 **实验室**：[四川大学，Dilab](https://github.com/dilab-scu)
@@ -74,44 +73,14 @@ ROUGE-L 为 0.6205 左右；**wobert**  单模型在复赛 Test2 上的 ROUGE-L 
 **6**. Roberta_wwm_large2transformer 参数全部进行预训练：dev: 0.628，test2：0.5860，验证集提升，但是 test2 却下降，无用；
 **7**. ensemble：选取几个模型进行 rerank 融合，即几个模型的生成结果两两计算ROUGE-L分数并求和，取其中 ROUGE-L 最高的结果作为最终结果，有用。
 
-
-
-### 3.核心代码
-
-```
-class QuestionAnswerGeneration(AutoRegressiveDecoder):
-    """
-    通过beam search来生成问题
-    """
-    @AutoRegressiveDecoder.wraps(default_rtype='probas')
-    def predict(self, inputs, output_ids, states):
-        token_ids, segment_ids = inputs
-        token_ids = np.concatenate([token_ids, output_ids], 1)
-        segment_ids = np.concatenate([segment_ids, np.ones_like(output_ids)], 1)
-        return model.predict([token_ids, segment_ids])[:, -1]
-
-    def generate(self, passage, answer,topk=k):
-        p_token_ids, _ = tokenizer.encode(passage, maxlen=600)
-        p_token_ids = p_token_ids[-max_p_len:]
-        p_token_ids[0]=2
-        a_token_ids, _ = tokenizer.encode(answer, maxlen=max_a_len)
-        token_ids = p_token_ids + a_token_ids[1:]
-        # print(len(token_ids))
-        segment_ids = [0] * (len(p_token_ids)+len(a_token_ids)-1)
-        output_ids = self.beam_search([token_ids, segment_ids],
-                                      k)  # 基于beam search
-        return tokenizer.decode(output_ids)
-
-```
-
-### 4.比赛总结和感想
+### 3.比赛总结和感想
 - 用开源的中文医学QA数据进行预学习，在线下提升较大，但线上提升较小，可能是没有根据任务进行精细化设计。
 - 使用预训练模型，虽然效果好，但耗时较长，需要较多算力。因为时间和硬件原因，还有不少想法未测试验证或尝试。
 - 比赛过程中经常出现线下分数上升，但是线上分数下降的情况，说明自行划分的数据集分布不太一致，需要增强模型鲁棒性，本打算尝试对抗训练，如 FGM、PGD，但是提交次数和硬件资源告急，未尝试。
 - 队友合作互助很重要，最好相互代码检查。面对需要进行长时间训练的模型代码，最好能相互**审核**一下代码，避免训练完才发现有BUGGGGG，浪费大量时间。
 - 前期讨论规划很重要。打比赛需要有规划，最好列一个时间线，分成不同阶段，有选择地尝试，合理估计每个想法可能的提升，有所取舍，并规定每个阶段的 **deadline**。
 
-### 5.感谢
+### 4.感谢
 - 感谢主办方提供平台与一个如此优秀的赛题。让我们在尽情享受比赛的过程中，也找到了中医新方向。
 - 感谢 [**北京妙医佳健康科技闫广庆**](https://tianchi.aliyun.com/forum/postDetail?postId=130889 ) 开源的医学wobert
 - 感谢 [**Dilab**](https://github.com/dilab-scu) 实验室提供的算力。
